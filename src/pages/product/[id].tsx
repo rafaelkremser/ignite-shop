@@ -15,10 +15,30 @@ interface ProductProps {
     imageUrl: string
     price: string
     description: string
+    defaultPriceId: string
   }
 }
 
 export default function Product({ product }: ProductProps) {
+  function handleBuyProduct() {
+    console.log(product.defaultPriceId)
+
+    // fetch('/api/checkout', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     priceId: product.defaultPriceId,
+    //   }),
+    // })
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     const { checkoutUrl } = data
+    //     window.location.href = checkoutUrl
+    //   })
+  }
+
   return (
     <ProductContainer>
       <ImageContainer>
@@ -31,7 +51,7 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product.description}</p>
 
-        <button>Comprar agora</button>
+        <button onClick={handleBuyProduct}>Comprar agora</button>
       </ProductDetails>
     </ProductContainer>
   )
@@ -66,6 +86,7 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
           currency: 'BRL',
         }).format(price.unit_amount / 100),
         description: product.description,
+        defaultPriceId: price.id,
       },
     },
     revalidate: 60 * 60 * 1, // 1 hours
