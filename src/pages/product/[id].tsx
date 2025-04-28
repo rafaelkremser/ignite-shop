@@ -7,6 +7,8 @@ import {
   ProductContainer,
   ProductDetails,
 } from '../../styles/pages/product'
+import axios from 'axios'
+import { useState } from 'react'
 
 interface ProductProps {
   product: {
@@ -20,23 +22,27 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-  function handleBuyProduct() {
-    console.log(product.defaultPriceId)
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false)
 
-    // fetch('/api/checkout', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     priceId: product.defaultPriceId,
-    //   }),
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     const { checkoutUrl } = data
-    //     window.location.href = checkoutUrl
-    //   })
+  async function handleBuyProduct() {
+    try {
+      setIsCreatingCheckoutSession(true)
+
+      const response = await axios.post('/api/checkout', {
+        priceId: product.defaultPriceId,
+      })
+
+      const { checkoutUrl } = response.data
+
+      window.location.href = checkoutUrl
+    } catch (err) {
+      console.error(err)
+
+      setIsCreatingCheckoutSession(false)
+
+      alert('Falha ao redirecionar para o checkout!')
+    }
   }
 
   return (
@@ -51,7 +57,9 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product.description}</p>
 
-        <button onClick={handleBuyProduct}>Comprar agora</button>
+        <button disabled={isCreatingCheckoutSession} onClick={handleBuyProduct}>
+          Comprar agora
+        </button>
       </ProductDetails>
     </ProductContainer>
   )
@@ -64,6 +72,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
   params,
 }) => {
